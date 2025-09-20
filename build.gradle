@@ -1,0 +1,127 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'me.champeau.jmh' version '0.7.2'
+}
+
+group = 'com.study'
+version = '1.0-SNAPSHOT'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Testing
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
+    testImplementation 'org.assertj:assertj-core:3.24.2'
+    testImplementation 'org.mockito:mockito-core:5.8.0'
+
+    // Logging
+    implementation 'ch.qos.logback:logback-classic:1.4.14'
+    implementation 'org.slf4j:slf4j-api:2.0.9'
+
+    // Monitoring
+    implementation 'io.micrometer:micrometer-core:1.12.0'
+
+    // Benchmarking
+    jmh 'org.openjdk.jmh:jmh-core:1.37'
+    jmh 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
+
+    // Utilities
+    implementation 'com.google.guava:guava:32.1.3-jre'
+    implementation 'org.apache.commons:commons-lang3:3.14.0'
+
+    // JSON
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.0'
+
+    // Visualization (optional)
+    implementation 'org.jfree:jfreechart:1.5.4'
+}
+
+application {
+    mainClass = 'com.study.Main'
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+    options.compilerArgs += [
+            '--enable-preview',
+            '-Xlint:preview'
+    ]
+}
+
+tasks.withType(JavaExec) {
+    jvmArgs += [
+            '--enable-preview',
+            '--add-modules', 'jdk.incubator.concurrent'
+    ]
+}
+
+test {
+    useJUnitPlatform()
+    jvmArgs += ['--enable-preview']
+
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+    }
+}
+
+run {
+    standardInput = System.in
+    if (project.hasProperty('args')) {
+        args project.args.split(',')
+    }
+}
+
+// JMH 벤치마크 실행 태스크
+jmh {
+    fork = 2
+    iterations = 3
+    warmupIterations = 2
+    threads = 4
+    jvmArgs = ['--enable-preview']
+}
+
+// Virtual Thread 성능 테스트용 커스텀 태스크
+task runVirtualThreadBenchmark(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.study.comparison.performance.VirtualThreadBenchmark'
+    jvmArgs = [
+            '--enable-preview',
+            '-Xms2g',
+            '-Xmx4g',
+            '-XX:+UseG1GC'
+    ]
+}
+
+// 프로세스 데모 실행 태스크
+task runProcessDemo(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.study.process.ProcessDemo'
+    jvmArgs = ['--enable-preview']
+}
+
+// Platform Thread 데모 실행 태스크
+task runPlatformThreadDemo(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.study.thread.PlatformThreadDemo'
+    jvmArgs = ['--enable-preview']
+}
+
+// Virtual Thread 데모 실행 태스크
+task runVirtualThreadDemo(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.study.thread.VirtualThreadDemo'
+    jvmArgs = ['--enable-preview']
+}
+
+wrapper {
+    gradleVersion = '8.5'
+}
