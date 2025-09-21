@@ -10,7 +10,9 @@ public class ChildProcess {
         long pid = ProcessHandle.current().pid();
         System.out.println("Child process started");
         System.out.println("PID: "+pid);
-
+        if(args.length == 0){
+            System.out.println("Performing default task");
+        }
         System.out.println("Child process completed");
     }
 }
