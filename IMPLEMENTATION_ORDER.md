@@ -2,23 +2,699 @@
 
 ## 개요
 이 문서는 process_thread 프로젝트의 체계적인 구현을 위한 단계별 가이드입니다.
-각 단계는 이전 단계의 기반 위에 구축되므로 순서대로 진행하는 것을 권장합니다.
+Java(Spring Boot)와 Python(FastAPI)을 동시에 구현하여 두 언어/프레임워크에서의 프로세스와 스레드 동작을 비교 학습합니다.
+
+## 프로젝트 구조 개요
+
+```
+process_thread/
+├── java-spring/                    # Java Spring Boot 프로젝트
+│   ├── src/
+│   ├── build.gradle
+│   └── README.md
+├── python-fastapi/                 # Python FastAPI 프로젝트
+│   ├── app/
+│   ├── requirements.txt
+│   ├── pyproject.toml
+│   └── README.md
+├── shared/                         # 공통 리소스
+│   ├── docs/                       # 통합 문서
+│   ├── benchmarks/                 # 벤치마크 결과
+│   └── configs/                    # 공통 설정
+├── docker/                         # 컨테이너 설정
+│   ├── java.Dockerfile
+│   ├── python.Dockerfile
+│   └── docker-compose.yml
+├── scripts/                        # 실행 스크립트
+│   ├── run-java.sh
+│   ├── run-python.sh
+│   └── run-comparison.sh
+└── README.md                       # 전체 프로젝트 README
+```
 
 ## 구현 단계 개요
 
-| 단계 | 모듈 | 예상 소요 시간 | 난이도 | 의존성 |
-|------|------|--------------|--------|--------|
-| Phase 1 | Common/Util | 1일 | ★☆☆ | 없음 |
-| Phase 2 | Process 기초 | 2일 | ★★☆ | Phase 1 |
-| Phase 3 | Thread 기초 | 2일 | ★★☆ | Phase 1 |
-| Phase 4 | 동기화 | 3일 | ★★★ | Phase 3 |
-| Phase 5 | 고급 기능 | 3일 | ★★★ | Phase 2, 3, 4 |
-| Phase 6 | 성능 측정 | 2일 | ★★☆ | Phase 1-5 |
-| Phase 7 | 통합 및 최적화 | 2일 | ★★★ | 전체 |
+| 단계 | 모듈 | Java/Python | 예상 소요 시간 | 난이도 | 의존성 |
+|------|------|------------|--------------|--------|--------|
+| Phase 1 | 프로젝트 설정 | 공통 | 1일 | ★☆☆ | 없음 |
+| Phase 2 | Process 기초 | 병렬 구현 | 3일 | ★★☆ | Phase 1 |
+| Phase 3 | Thread 기초 | 병렬 구현 | 3일 | ★★☆ | Phase 1 |
+| Phase 4 | 동기화 | 병렬 구현 | 4일 | ★★★ | Phase 3 |
+| Phase 5 | 웹 프레임워크 통합 | 병렬 구현 | 3일 | ★★★ | Phase 3, 4 |
+| Phase 6 | 고급 기능 | 병렬 구현 | 4일 | ★★★ | Phase 2-5 |
+| Phase 7 | 성능 비교 | 통합 | 3일 | ★★☆ | Phase 1-6 |
+| Phase 8 | 통합 및 최적화 | 통합 | 2일 | ★★★ | 전체 |
+
+## Phase 1: 프로젝트 초기 설정
+
+### 목표
+Java Spring Boot와 Python FastAPI 프로젝트 기본 구조 설정
+
+### 1.1 Java Spring Boot 프로젝트 설정
+
+#### 디렉토리 구조
+```
+java-spring/
+├── src/main/java/com/study/processthread/
+│   ├── process/
+│   ├── thread/
+│   ├── comparison/
+│   ├── web/                       # Spring Web 컨트롤러
+│   └── config/                     # Spring 설정
+├── src/main/resources/
+└── build.gradle
+```
+
+#### 구현 순서
+```
+1. build.gradle 설정
+   - Spring Boot 3.2.x
+   - Java 21
+   - Virtual Thread 지원
+
+2. application.yml 설정
+   - 서버 포트: 8080
+   - Virtual Thread 활성화
+
+3. SpringBootApplication 메인 클래스
+
+4. 기본 RestController
+```
+
+### 1.2 Python FastAPI 프로젝트 설정
+
+#### 디렉토리 구조
+```
+python-fastapi/
+├── app/
+│   ├── __init__.py
+│   ├── main.py
+│   ├── process/
+│   ├── thread/
+│   ├── comparison/
+│   ├── api/                       # FastAPI 라우터
+│   └── core/                      # 핵심 설정
+├── tests/
+├── requirements.txt
+└── pyproject.toml
+```
+
+#### 구현 순서
+```
+1. pyproject.toml 설정
+   - Python 3.11+
+   - FastAPI
+   - Uvicorn
+
+2. requirements.txt
+   - fastapi
+   - uvicorn[standard]
+   - asyncio
+   - multiprocessing
+   - psutil
+
+3. main.py FastAPI 앱 생성
+
+4. 기본 API 엔드포인트
+```
 
 ---
 
-## Phase 1: 기반 구조 구축 (Foundation)
+## Phase 2: Process 모듈 구현 (병렬)
+
+### 목표
+Java와 Python에서 프로세스 생성과 관리 구현 및 비교
+
+### 2.1 Java Process 구현
+
+#### 구현 파일
+```
+java-spring/src/main/java/com/study/processthread/process/
+├── creation/
+│   ├── ProcessCreator.java
+│   ├── ProcessFactory.java
+│   └── ChildProcess.java
+├── communication/
+│   ├── SocketIPC.java
+│   └── PipeIPC.java
+├── monitoring/
+│   └── ProcessMonitor.java
+└── management/
+    └── ProcessManager.java
+```
+
+#### Spring 통합
+```java
+// ProcessController.java
+@RestController
+@RequestMapping("/api/java/process")
+public class ProcessController {
+    // POST /api/java/process/create
+    // GET /api/java/process/{pid}/status
+    // DELETE /api/java/process/{pid}
+}
+```
+
+### 2.2 Python Process 구현
+
+#### 구현 파일
+```
+python-fastapi/app/process/
+├── creation/
+│   ├── process_creator.py
+│   ├── process_factory.py
+│   └── child_process.py
+├── communication/
+│   ├── socket_ipc.py
+│   ├── pipe_ipc.py
+│   └── queue_ipc.py
+├── monitoring/
+│   └── process_monitor.py
+└── management/
+    └── process_manager.py
+```
+
+#### FastAPI 통합
+```python
+# process_router.py
+from fastapi import APIRouter
+
+router = APIRouter(prefix="/api/python/process")
+
+@router.post("/create")
+async def create_process():
+    pass
+
+@router.get("/{pid}/status")
+async def get_process_status(pid: int):
+    pass
+```
+
+### 2.3 비교 테스트
+```
+- 프로세스 생성 시간 비교
+- 메모리 격리 확인
+- IPC 성능 비교
+```
+
+---
+
+## Phase 3: Thread 모듈 구현 (병렬)
+
+### 목표
+Java Virtual Thread와 Python asyncio/threading 비교
+
+### 3.1 Java Thread 구현
+
+#### Platform Thread vs Virtual Thread
+```
+java-spring/src/main/java/com/study/processthread/thread/
+├── lifecycle/
+│   ├── PlatformThreadDemo.java
+│   ├── VirtualThreadDemo.java
+│   └── ThreadStateObserver.java
+├── synchronization/
+│   ├── SynchronizedDemo.java
+│   └── LockDemo.java
+└── pool/
+    ├── ThreadPoolExecutorDemo.java
+    └── VirtualThreadExecutor.java
+```
+
+#### Spring WebFlux 통합
+```java
+@RestController
+@RequestMapping("/api/java/thread")
+public class ThreadController {
+    
+    @GetMapping(value = "/virtual/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<String> virtualThreadStream() {
+        // Virtual Thread 기반 스트리밍
+    }
+}
+```
+
+### 3.2 Python Thread 구현
+
+#### asyncio vs threading vs multiprocessing.Process
+```
+python-fastapi/app/thread/
+├── lifecycle/
+│   ├── thread_demo.py
+│   ├── async_demo.py
+│   └── thread_state_observer.py
+├── synchronization/
+│   ├── lock_demo.py
+│   ├── async_lock_demo.py
+│   └── semaphore_demo.py
+└── pool/
+    ├── thread_pool_demo.py
+    └── async_pool_demo.py
+```
+
+#### FastAPI 비동기 통합
+```python
+@router.get("/async/stream")
+async def async_stream():
+    async def generate():
+        for i in range(10):
+            await asyncio.sleep(1)
+            yield f"data: {i}\n\n"
+    return StreamingResponse(generate())
+```
+
+### 3.3 비교 포인트
+```
+- Java Virtual Thread vs Python asyncio
+- Java Platform Thread vs Python threading
+- 동시성 모델 차이
+- GIL의 영향
+```
+
+---
+
+## Phase 4: 동기화 메커니즘 (병렬)
+
+### 목표
+양 언어의 동기화 메커니즘 구현 및 비교
+
+### 4.1 Java 동기화
+
+```java
+// Java synchronized, ReentrantLock, Semaphore, etc.
+java-spring/src/main/java/com/study/processthread/thread/synchronization/
+├── ProducerConsumer.java
+├── DiningPhilosophers.java
+├── DeadlockSimulator.java
+└── StampedLockDemo.java
+```
+
+### 4.2 Python 동기화
+
+```python
+# Python Lock, asyncio.Lock, Semaphore, etc.
+python-fastapi/app/thread/synchronization/
+├── producer_consumer.py
+├── dining_philosophers.py
+├── deadlock_simulator.py
+└── async_synchronization.py
+```
+
+### 4.3 비교 실험
+```
+- 동기화 오버헤드
+- 데드락 처리 방식
+- 성능 차이
+```
+
+---
+
+## Phase 5: 웹 프레임워크 통합
+
+### 목표
+Spring Boot와 FastAPI에서 프로세스/스레드 활용 비교
+
+### 5.1 Spring Boot 통합
+
+#### 구현 내용
+```java
+java-spring/src/main/java/com/study/processthread/web/
+├── controller/
+│   ├── ProcessController.java
+│   ├── ThreadController.java
+│   └── ComparisonController.java
+├── service/
+│   ├── AsyncService.java           // @Async 사용
+│   ├── ReactiveService.java        // WebFlux
+│   └── VirtualThreadService.java   // Virtual Thread
+└── config/
+    ├── AsyncConfig.java            // ThreadPoolTaskExecutor
+    └── WebFluxConfig.java
+```
+
+#### 주요 기능
+```java
+@RestController
+public class WorkloadController {
+    
+    // CPU 집약적 작업
+    @PostMapping("/api/java/workload/cpu")
+    public CompletableFuture<Result> cpuIntensive() {
+        return CompletableFuture.supplyAsync(() -> {
+            // Virtual Thread에서 실행
+        }, virtualThreadExecutor);
+    }
+    
+    // I/O 집약적 작업
+    @PostMapping("/api/java/workload/io")
+    public Mono<Result> ioIntensive() {
+        // WebFlux 비동기 처리
+    }
+}
+```
+
+### 5.2 FastAPI 통합
+
+#### 구현 내용
+```python
+python-fastapi/app/api/
+├── routers/
+│   ├── process_router.py
+│   ├── thread_router.py
+│   └── comparison_router.py
+├── services/
+│   ├── async_service.py
+│   ├── background_service.py
+│   └── concurrent_service.py
+└── dependencies/
+    └── thread_pool.py
+```
+
+#### 주요 기능
+```python
+@router.post("/api/python/workload/cpu")
+async def cpu_intensive():
+    loop = asyncio.get_event_loop()
+    # ProcessPoolExecutor 사용
+    result = await loop.run_in_executor(
+        process_pool, cpu_bound_task
+    )
+    return result
+
+@router.post("/api/python/workload/io")
+async def io_intensive():
+    # asyncio 비동기 처리
+    async with httpx.AsyncClient() as client:
+        results = await asyncio.gather(*tasks)
+    return results
+```
+
+### 5.3 프레임워크 비교
+```
+- 요청 처리 모델 (Thread-per-request vs Event Loop)
+- 동시 요청 처리 능력
+- 리소스 사용량
+- 응답 시간
+```
+
+---
+
+## Phase 6: 고급 기능 구현
+
+### 목표
+각 언어의 고급 동시성 기능 구현
+
+### 6.1 Java 고급 기능
+
+#### 구현 내용
+```
+java-spring/src/main/java/com/study/processthread/advanced/
+├── structured/
+│   ├── StructuredConcurrency.java  // Java 21 Preview
+│   └── ScopedValueDemo.java
+├── reactive/
+│   ├── ReactorDemo.java            // Project Reactor
+│   └── BackpressureDemo.java
+└── distributed/
+    └── HazelcastDemo.java           // 분산 처리
+```
+
+### 6.2 Python 고급 기능
+
+#### 구현 내용
+```
+python-fastapi/app/advanced/
+├── async_patterns/
+│   ├── async_context_manager.py
+│   └── async_generator.py
+├── concurrent_futures/
+│   ├── process_pool_executor.py
+│   └── thread_pool_executor.py
+└── distributed/
+    └── celery_demo.py               # 분산 태스크 큐
+```
+
+---
+
+## Phase 7: 성능 비교 및 벤치마킹
+
+### 목표
+Java와 Python의 종합적인 성능 비교
+
+### 7.1 벤치마크 시나리오
+
+#### 공통 테스트 케이스
+```
+shared/benchmarks/scenarios/
+├── process_creation.yaml
+├── thread_creation.yaml
+├── context_switching.yaml
+├── io_intensive.yaml
+├── cpu_intensive.yaml
+└── mixed_workload.yaml
+```
+
+### 7.2 Java 벤치마크
+
+```java
+java-spring/src/test/java/com/study/processthread/benchmark/
+├── ProcessBenchmark.java    // JMH
+├── ThreadBenchmark.java
+└── WebBenchmark.java         // Spring Boot 엔드포인트
+```
+
+### 7.3 Python 벤치마크
+
+```python
+python-fastapi/tests/benchmark/
+├── process_benchmark.py     # pytest-benchmark
+├── thread_benchmark.py
+└── api_benchmark.py          # locust
+```
+
+### 7.4 비교 메트릭
+```
+1. 생성 시간
+   - Process: Java ProcessBuilder vs Python multiprocessing
+   - Thread: Java Virtual Thread vs Python asyncio
+
+2. 컨텍스트 스위칭
+   - Java: Platform Thread vs Virtual Thread
+   - Python: threading vs asyncio
+
+3. 메모리 사용량
+   - 프로세스별 메모리
+   - 스레드별 메모리
+
+4. 처리량 (Throughput)
+   - 동시 요청 처리
+   - 초당 작업 수
+
+5. 응답 시간
+   - P50, P95, P99
+```
+
+---
+
+## Phase 8: 통합 및 문서화
+
+### 목표
+전체 시스템 통합과 비교 분석 문서 작성
+
+### 8.1 통합 대시보드
+
+```
+shared/dashboard/
+├── docker-compose.yml
+├── prometheus.yml          # 메트릭 수집
+├── grafana/
+│   └── dashboards/        # 비교 대시보드
+└── scripts/
+    └── run-comparison.sh   # 동시 실행 스크립트
+```
+
+### 8.2 Docker 통합
+
+```dockerfile
+# docker/java.Dockerfile
+FROM eclipse-temurin:21-jdk
+# Spring Boot 앱 실행
+
+# docker/python.Dockerfile  
+FROM python:3.11-slim
+# FastAPI 앱 실행
+```
+
+### 8.3 비교 문서
+
+```
+shared/docs/
+├── architecture/
+│   ├── java-architecture.md
+│   ├── python-architecture.md
+│   └── comparison.md
+├── experiments/
+│   ├── 01-process-isolation.md
+│   ├── 02-thread-models.md
+│   ├── 03-gil-vs-virtual-thread.md
+│   └── 04-framework-comparison.md
+└── results/
+    ├── performance-report.md
+    └── recommendations.md
+```
+
+---
+
+## 구현 순서 체크리스트
+
+### Week 1: 기초 설정
+- [ ] Java Spring Boot 프로젝트 생성
+- [ ] Python FastAPI 프로젝트 생성
+- [ ] Docker 환경 구성
+- [ ] 기본 API 엔드포인트
+
+### Week 2: Process & Thread 기초
+- [ ] Java Process 구현
+- [ ] Python Process 구현
+- [ ] Java Thread (Platform/Virtual) 구현
+- [ ] Python Thread (threading/asyncio) 구현
+
+### Week 3: 동기화 및 웹 통합
+- [ ] Java 동기화 메커니즘
+- [ ] Python 동기화 메커니즘
+- [ ] Spring Boot 통합
+- [ ] FastAPI 통합
+
+### Week 4: 고급 기능 및 비교
+- [ ] 고급 동시성 패턴
+- [ ] 벤치마크 구현
+- [ ] 성능 측정
+- [ ] 결과 분석
+
+### Week 5: 문서화 및 마무리
+- [ ] 통합 테스트
+- [ ] 문서 작성
+- [ ] 대시보드 구성
+- [ ] 최종 검토
+
+---
+
+## 주요 비교 포인트
+
+### 프로세스 레벨
+```
+Java:
+- ProcessBuilder API
+- JVM 프로세스 격리
+- 메모리 오버헤드
+
+Python:
+- multiprocessing 모듈
+- GIL 우회
+- 프로세스 간 통신
+```
+
+### 스레드 레벨
+```
+Java:
+- Platform Thread (OS 스레드)
+- Virtual Thread (경량 스레드)
+- Spring @Async, WebFlux
+
+Python:
+- threading (GIL 제약)
+- asyncio (이벤트 루프)
+- FastAPI 비동기 처리
+```
+
+### 웹 프레임워크
+```
+Spring Boot:
+- Thread-per-request (전통적)
+- Reactive (WebFlux)
+- Virtual Thread 지원
+
+FastAPI:
+- ASGI 서버 (Uvicorn)
+- 이벤트 루프 기반
+- async/await 네이티브 지원
+```
+
+---
+
+## 개발 환경 설정
+
+### Java 환경
+```bash
+# JDK 21 설치
+sdk install java 21-tem
+
+# Gradle 설정
+./gradlew build
+
+# Spring Boot 실행
+./gradlew bootRun
+```
+
+### Python 환경
+```bash
+# Python 3.11+ 설치
+pyenv install 3.11.7
+pyenv local 3.11.7
+
+# 가상환경 생성
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# venv\Scripts\activate  # Windows
+
+# 의존성 설치
+pip install -r requirements.txt
+
+# FastAPI 실행
+uvicorn app.main:app --reload --port 8000
+```
+
+### Docker 환경
+```bash
+# 전체 시스템 실행
+docker-compose up
+
+# 개별 실행
+docker-compose up java-app
+docker-compose up python-app
+```
+
+---
+
+## 테스트 전략
+
+### Java 테스트
+```
+- JUnit 5: 단위 테스트
+- MockMvc: 컨트롤러 테스트
+- JMH: 마이크로 벤치마크
+- Testcontainers: 통합 테스트
+```
+
+### Python 테스트
+```
+- pytest: 단위 테스트
+- pytest-asyncio: 비동기 테스트
+- httpx: API 테스트
+- pytest-benchmark: 성능 테스트
+```
+
+### 부하 테스트
+```
+- JMeter: HTTP 부하 테스트
+- Locust: Python 기반 부하 테스트
+- wrk: 간단한 HTTP 벤치마킹
+```
+
+---
+
+이제 Java Spring Boot와 Python FastAPI를 모두 포함한 통합 프로젝트 구조가 완성되었습니다.
+각 언어의 특성을 살려 구현하고 직접 비교할 수 있도록 설계했습니다.
 
 ### 목표
 프로젝트의 기본 구조와 공통 유틸리티 구현

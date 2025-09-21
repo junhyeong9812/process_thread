@@ -1,0 +1,4 @@
+rootProject.name = 'process_thread'
+
+include 'java-spring'
+project(':java-spring').projectDir = new File(rootDir, 'java-spring')

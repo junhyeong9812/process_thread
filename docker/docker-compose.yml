@@ -1,0 +1,82 @@
+version: '3.9'
+
+services:
+  java-spring:
+    build:
+      context: ..
+      dockerfile: docker/java.Dockerfile
+    container_name: process-thread-java
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - JAVA_OPTS=--enable-preview -Xms512m -Xmx1g
+    networks:
+      - process-thread-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    volumes:
+      - java-logs:/app/logs
+
+  python-fastapi:
+    build:
+      context: ..
+      dockerfile: docker/python.Dockerfile
+    container_name: process-thread-python
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=false
+      - WORKERS=4
+    networks:
+      - process-thread-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    volumes:
+      - python-logs:/app/logs
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: process-thread-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    networks:
+      - process-thread-net
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: process-thread-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources
+    networks:
+      - process-thread-net
+    depends_on:
+      - prometheus
+
+networks:
+  process-thread-net:
+    driver: bridge
+
+volumes:
+  java-logs:
+  python-logs:
+  prometheus-data:
+  grafana-data:

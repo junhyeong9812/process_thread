@@ -1,0 +1,31 @@
+# Core dependencies
+fastapi==0.109.0
+uvicorn[standard]==0.25.0
+pydantic==2.5.3
+python-multipart==0.0.6
+httpx==0.25.2
+
+# Process & Thread management
+psutil==5.9.6
+aiofiles==23.2.1
+
+# Testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+pytest-benchmark==4.0.0
+pytest-mock==3.12.0
+
+# Development tools
+black==23.12.1
+ruff==0.1.9
+mypy==1.8.0
+ipython==8.19.0
+
+# Monitoring
+prometheus-client==0.19.0
+prometheus-fastapi-instrumentator==6.1.0
+
+# Utilities
+python-dotenv==1.0.0
+pyyaml==6.0.1
