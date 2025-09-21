@@ -15,16 +15,20 @@ import static org.junit.jupiter.api.Assertions.*;
 class ChildProcessTest {
 
     private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    private final ByteArrayOutputStream errerStream = new ByteArrayOutputStream();
     private final PrintStream originalOut = System.out;
+    private final PrintStream originalErr = System.err;
 
     @BeforeEach
     void setUp(){
         System.setOut(new PrintStream(outputStream));
+        System.setErr(new PrintStream(errerStream));
     }
 
     @AfterEach
     void tearDown(){
         System.setOut(originalOut);
+        System.setErr(originalErr);
     }
 
     @Test
@@ -148,5 +152,18 @@ class ChildProcessTest {
         assertThat(output).contains("Result: 55");
     }
 
+    @Test
+    @DisplayName("11. COMPUTE 모드에서 잘못된 숫자를 처리한다.")
+    void shouldHandleInvalidNumberInCompute(){
+        //given
+        String[] args = {"COMPUTE", "invalid"};
 
+        //when
+        ChildProcess.main(args);
+
+        //then
+        String output = outputStream.toString();
+        String error = errerStream.toString();
+        assertThat(output+error).contains("Invalid number");
+    }
 }

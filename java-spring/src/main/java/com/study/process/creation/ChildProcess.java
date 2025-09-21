@@ -13,7 +13,7 @@ public class ChildProcess {
         if(args.length == 0){
             System.out.println("Performing default task");
         } else {
-            if(args[0]=="ECHO") {
+            if(args[0].equals("ECHO")) {
                 if (args.length > 1) {
                     StringBuilder message = new StringBuilder();
                     for (int i = 1; i < args.length; i++) {
@@ -22,7 +22,7 @@ public class ChildProcess {
                     }
                     System.out.println("ECHO: " + message);
                 }
-            }else if(args[0]=="COMPUTE"){
+            }else if(args[0].equals("COMPUTE")){
                 if(args.length>1){
                     try{
                         int n = Integer.parseInt(args[1]);
