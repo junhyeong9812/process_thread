@@ -1,5 +1,10 @@
 package com.study.process.creation;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 /**
  * 자식 프로세스로 실행될 독립적인 JAVA 애플리케이션
  * 다양한 모드로 실행 가능하여 프로세스 테스트에 활용
@@ -13,7 +18,16 @@ public class ChildProcess {
         if(args.length == 0){
             System.out.println("Performing default task");
         } else {
-            if(args[0].equals("ECHO")) {
+            //모드별 실행
+            String mode = args[0];
+            excuteMode(mode,args);
+        }
+        System.out.println("Child process completed");
+    }
+
+    private static void excuteMode(String mode,String[] args){
+        switch (mode){
+            case "ECHO":
                 if (args.length > 1) {
                     StringBuilder message = new StringBuilder();
                     for (int i = 1; i < args.length; i++) {
@@ -22,7 +36,8 @@ public class ChildProcess {
                     }
                     System.out.println("ECHO: " + message);
                 }
-            }else if(args[0].equals("COMPUTE")){
+                break;
+            case "COMPUTE":
                 if(args.length>1){
                     try{
                         int n = Integer.parseInt(args[1]);
@@ -37,8 +52,24 @@ public class ChildProcess {
                         System.err.println("Invalid number: " + args[1]);
                     }
                 }
-            }
+                break;
+            case "FILE":
+                if(args.length < 3){
+                    System.out.println("FILE mode requires filename and content");
+                    return;
+                }
+
+                String filename = args[1];
+                String content =args[2];
+                try {
+                    Path filePath = Paths.get(filename);
+                    Files.writeString(filePath,content);
+                    System.out.println("File created"+ filename);
+                }catch (IOException e){
+                    System.err.println("Failed to create file :" +e.getMessage());
+                }
+                break;
+
         }
-        System.out.println("Child process completed");
     }
 }

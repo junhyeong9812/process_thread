@@ -1,1 +1,204 @@
 python-fastapi/venv
+
+# ==================== Java / Spring Boot ====================
+# Compiled class files
+*.class
+
+# Package Files
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Build directories
+build/
+target/
+out/
+bin/
+
+# Gradle
+.gradle/
+gradle/
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+gradlew
+gradlew.bat
+
+# Maven (if used)
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/
+
+# Spring Boot
+*.pid
+
+# ==================== Python ====================
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+.Python
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv/
+.env/
+python-env/
+
+# Distribution / packaging
+.Python
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+pip-wheel-metadata/
+
+# FastAPI
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+
+# ==================== IDE / Editors ====================
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+.idea_modules/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Eclipse
+.metadata/
+.project
+.classpath
+.settings/
+.loadpath
+.recommenders/
+.externalToolBuilders/
+*.launch
+
+# NetBeans
+nbproject/private/
+nbbuild/
+nbdist/
+.nb-gradle/
+
+# ==================== OS Files ====================
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# ==================== Project Specific ====================
+# Logs
+logs/
+*.log
+log/
+*.log.*
+
+# Application properties with sensitive data
+application-local.properties
+application-local.yml
+application-*.properties
+!application.properties
+!application-dev.properties
+!application-prod.properties
+
+# Environment files
+.env
+.env.local
+.env.*.local
+*.env
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+*.h2.db
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*.bak
+*.orig
+
+# JMH (Java Microbenchmark Harness)
+jmh-result.json
+*.jmh.csv
+
+# Docker volumes (if local)
+docker/data/
+docker/volumes/
+
+# Test coverage
+coverage/
+.coverage
+*.cover
+.nyc_output/
+
+# Documentation build
+docs/_build/
+site/
+
+# Secrets and credentials
+secrets/
+credentials/
+*.key
+*.pem
+*.p12
+*.jks
+
+# Node modules (if any frontend)
+node_modules/
+
+# Prometheus data
+prometheus_data/
+
+# Benchmarking results
+benchmark-results/

@@ -172,6 +172,14 @@ class ChildProcessTest {
     @Test
     @DisplayName("12. FILE 모드를 인식한다.")
     void shouldRecognizeFileMode(@TempDir Path tempDir){
+        //given
+        Path file = tempDir.resolve("text.txt");
+        String[] args = {"FILE",file.toString(),"content"};
 
+        //when
+        ChildProcess.main(args);
+
+        //then
+        assertThat(file).exists();
     }
 }
