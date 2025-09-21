@@ -12,6 +12,8 @@ public class ChildProcess {
         System.out.println("PID: "+pid);
         if(args.length == 0){
             System.out.println("Performing default task");
+        } else {
+            System.out.println("ECHO:");
         }
         System.out.println("Child process completed");
     }

@@ -77,4 +77,18 @@ class ChildProcessTest {
         String output = outputStream.toString();
         assertThat(output).contains("Performing default task");
     }
+
+    @Test
+    @DisplayName("6. ECHO 모드를 인식한다.")
+    void shouldRecognizeEchoMode(){
+        //given
+        String[] args ={"ECHO"};
+
+        //when
+        ChildProcess.main(args);
+
+        //then
+        String output = outputStream.toString();
+        assertThat(output).contains("ECHO:");
+    }
 }
