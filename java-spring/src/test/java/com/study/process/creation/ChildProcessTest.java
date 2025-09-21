@@ -91,4 +91,20 @@ class ChildProcessTest {
         String output = outputStream.toString();
         assertThat(output).contains("ECHO:");
     }
+
+    @Test
+    @DisplayName("7. ECHO 모드에서 메시지를 출력한다.")
+    void shouldEchoMessage(){
+        //given
+        String[] args = {"ECHO","Hello"};
+
+        //when
+        ChildProcess.main(args);
+
+        //then
+        String output = outputStream.toString();
+        assertThat(output).contains("ECHO: Hello");
+    }
+
+
 }

@@ -13,7 +13,15 @@ public class ChildProcess {
         if(args.length == 0){
             System.out.println("Performing default task");
         } else {
-            System.out.println("ECHO:");
+            if(args.length>1){
+                StringBuilder message = new StringBuilder();
+                for (int i =1; i<args.length;i++){
+                    if(i>1) message.append(" ");
+                    message.append(args[i]);
+                }
+                System.out.println("ECHO: "+message);
+            }
+
         }
         System.out.println("Child process completed");
     }
