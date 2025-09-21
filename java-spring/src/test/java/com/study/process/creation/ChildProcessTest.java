@@ -106,5 +106,17 @@ class ChildProcessTest {
         assertThat(output).contains("ECHO: Hello");
     }
 
+    @Test
+    @DisplayName("8. ECHO 모드에서 여러 단어를 출력한다.")
+    void shouldEchoMultipleWords(){
+        //given
+        String[] args = {"ECHO","Hello","World"};
 
+        //when
+        ChildProcess.main(args);
+
+        //then
+        String output = outputStream.toString();
+        assertThat(output).contains("ECHO: Hello World");
+    }
 }
