@@ -133,4 +133,20 @@ class ChildProcessTest {
         String output = outputStream.toString();
         assertThat(output).contains("Computing sum");
     }
+
+    @Test
+    @DisplayName("10.COMPUTE 모드에서 1부터 N까지 합을 계산한다.")
+    void ShouldComputeSum(){
+        //given
+        String[] args ={"COMPUTE","10"};
+
+        //when
+        ChildProcess.main(args);
+
+        //then
+        String output = outputStream.toString();
+        assertThat(output).contains("Result: 55");
+    }
+
+
 }

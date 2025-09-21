@@ -26,7 +26,13 @@ public class ChildProcess {
                 if(args.length>1){
                     try{
                         int n = Integer.parseInt(args[1]);
-                        System.out.println("Computing sum");
+                        System.out.println("Computing sum from 1 to " +n);
+
+                        long sum = 0;
+                        for(int i = 1;i<=n;i++){
+                            sum += i;
+                        }
+                        System.out.println("Result: "+sum);
                     }catch (NumberFormatException e) {
                         System.err.println("Invalid number: " + args[1]);
                     }
