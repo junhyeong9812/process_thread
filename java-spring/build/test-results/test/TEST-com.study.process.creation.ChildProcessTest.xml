@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.study.process.creation.ChildProcessTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2025-09-21T07:43:16" hostname="JUN" time="0.023">
+  <properties/>
+  <testcase name="1. main 메서드가 존재한다." classname="com.study.process.creation.ChildProcessTest" time="0.023"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
