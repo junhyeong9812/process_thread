@@ -44,4 +44,37 @@ class ChildProcessTest {
         String output  = outputStream.toString();
         assertThat(output).contains("Child process started");
     }
+
+    @Test
+    @DisplayName("3. PID를 출력한다.")
+    void shouldPrintPid(){
+        //when
+        ChildProcess.main(new String[]{});
+
+        //then
+        String output = outputStream.toString();
+        assertThat(output).contains("PID: ");
+    }
+
+    @Test
+    @DisplayName("4. 완료 메시지를 출력한다.")
+    void shouldPrintCompletionMessage(){
+        //when
+        ChildProcess.main(new String[]{});
+
+        //then
+        String output = outputStream.toString();
+        assertThat(output).contains("Child process completed");
+    }
+
+    @Test
+    @DisplayName("5. 인자 없을 때 기본 작업을 수행한다.")
+    void shouldPerformDefaultTaskWithNoArgs(){
+        //when
+        ChildProcess.main(new String[]{});
+
+        //then
+        String output = outputStream.toString();
+        assertThat(output).contains("Performing default task");
+    }
 }

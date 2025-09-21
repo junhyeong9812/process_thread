@@ -6,6 +6,11 @@ package com.study.process.creation;
  * */
 public class ChildProcess {
     public static void main(String[] args){
+        //PID 획득
+        long pid = ProcessHandle.current().pid();
+        System.out.println("Child process started");
+        System.out.println("PID: "+pid);
 
+        System.out.println("Child process completed");
     }
 }
