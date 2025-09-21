@@ -5,9 +5,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -165,5 +167,11 @@ class ChildProcessTest {
         String output = outputStream.toString();
         String error = errerStream.toString();
         assertThat(output+error).contains("Invalid number");
+    }
+
+    @Test
+    @DisplayName("12. FILE 모드를 인식한다.")
+    void shouldRecognizeFileMode(@TempDir Path tempDir){
+
     }
 }

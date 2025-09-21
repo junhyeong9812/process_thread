@@ -65,46 +65,302 @@ pip install -e ".[dev]"
 python-fastapi/
 ├── app/
 │   ├── __init__.py
-│   ├── main.py                    # FastAPI 애플리케이션 진입점
+│   ├── main.py                                      # FastAPI 애플리케이션 진입점
 │   ├── core/
-│   │   ├── config.py              # 애플리케이션 설정
-│   │   ├── dependencies.py        # 의존성 주입
-│   │   └── exceptions.py          # 커스텀 예외
+│   │   ├── __init__.py
+│   │   ├── config.py                                # 애플리케이션 설정 (Settings 클래스)
+│   │   ├── dependencies.py                          # 의존성 주입 함수들
+│   │   ├── exceptions.py                            # 커스텀 예외 클래스들
+│   │   ├── logging.py                               # 로깅 설정
+│   │   └── security.py                              # 보안 관련 설정
 │   ├── api/
+│   │   ├── __init__.py
 │   │   └── v1/
-│   │       ├── api.py             # API 라우터 집합
+│   │       ├── __init__.py
+│   │       ├── api.py                               # API 라우터 집합
 │   │       └── endpoints/
-│   │           ├── process.py     # 프로세스 관련 엔드포인트
-│   │           ├── thread.py      # 스레드 관련 엔드포인트
-│   │           └── comparison.py  # 비교 분석 엔드포인트
+│   │           ├── __init__.py
+│   │           ├── process.py                       # 프로세스 관련 엔드포인트
+│   │           ├── thread.py                        # 스레드 관련 엔드포인트
+│   │           ├── comparison.py                    # 비교 분석 엔드포인트
+│   │           ├── health.py                        # 헬스체크 엔드포인트
+│   │           └── metrics.py                       # 메트릭 엔드포인트
 │   ├── process/
-│   │   ├── creation/              # 프로세스 생성
-│   │   ├── communication/         # IPC 구현
-│   │   ├── monitoring/            # 프로세스 모니터링
-│   │   └── management/            # 프로세스 관리
+│   │   ├── __init__.py
+│   │   ├── creation/
+│   │   │   ├── __init__.py
+│   │   │   ├── process_creator.py                   # subprocess를 사용한 프로세스 생성
+│   │   │   ├── process_factory.py                   # 다양한 타입의 프로세스 생성 팩토리
+│   │   │   ├── child_process.py                     # 자식 프로세스로 실행될 코드
+│   │   │   ├── process_spawner.py                   # 병렬 프로세스 생성 및 관리
+│   │   │   └── process_builder.py                   # 프로세스 빌더 패턴 구현
+│   │   ├── communication/
+│   │   │   ├── __init__.py
+│   │   │   ├── socket_ipc.py                        # 소켓 기반 IPC 구현
+│   │   │   ├── pipe_ipc.py                          # 파이프 기반 IPC 구현
+│   │   │   ├── queue_ipc.py                         # Queue 기반 IPC 구현
+│   │   │   ├── shared_memory_ipc.py                 # 공유 메모리 IPC 구현
+│   │   │   ├── message_queue.py                     # 메시지 큐 시뮬레이션
+│   │   │   └── ipc_benchmark.py                     # IPC 성능 측정
+│   │   ├── monitoring/
+│   │   │   ├── __init__.py
+│   │   │   ├── process_monitor.py                   # 프로세스 상태 모니터링
+│   │   │   ├── process_resource_tracker.py          # CPU, 메모리 사용량 추적
+│   │   │   ├── process_lifecycle_tracker.py         # 프로세스 생명주기 추적
+│   │   │   ├── process_metrics.py                   # 프로세스 메트릭 수집 및 분석
+│   │   │   └── psutil_wrapper.py                    # psutil 라이브러리 래퍼
+│   │   └── management/
+│   │       ├── __init__.py
+│   │       ├── process_manager.py                   # 프로세스 생성/종료 관리
+│   │       ├── process_pool.py                      # multiprocessing.Pool 구현
+│   │       ├── process_scheduler_simulator.py       # 프로세스 스케줄링 시뮬레이션
+│   │       ├── process_orchestrator.py              # 복잡한 프로세스 워크플로우 관리
+│   │       └── process_registry.py                  # 실행 중인 프로세스 레지스트리
 │   ├── thread/
-│   │   ├── lifecycle/             # 스레드 생명주기
-│   │   ├── synchronization/       # 동기화 메커니즘
-│   │   ├── pool/                  # 스레드 풀
-│   │   └── async_patterns/        # 비동기 패턴
-│   └── comparison/
-│       ├── benchmarks/            # 벤치마크 구현
-│       └── metrics/               # 메트릭 수집
+│   │   ├── __init__.py
+│   │   ├── lifecycle/
+│   │   │   ├── __init__.py
+│   │   │   ├── thread_state_demo.py                 # 스레드 상태 전이 데모
+│   │   │   ├── thread_lifecycle_observer.py         # 스레드 생명주기 관찰
+│   │   │   ├── native_thread_demo.py                # threading 모듈 실습
+│   │   │   ├── async_task_demo.py                   # asyncio 태스크 실습
+│   │   │   ├── thread_creation_comparison.py        # 스레드 생성 방식 비교
+│   │   │   └── gil_demo.py                          # GIL(Global Interpreter Lock) 데모
+│   │   ├── synchronization/
+│   │   │   ├── __init__.py
+│   │   │   ├── mutex_demo.py                        # Lock(뮤텍스) 구현
+│   │   │   ├── semaphore_demo.py                    # Semaphore 구현 및 실습
+│   │   │   ├── condition_demo.py                    # Condition Variable 구현
+│   │   │   ├── event_demo.py                        # Event 객체 사용
+│   │   │   ├── barrier_demo.py                      # Barrier 동기화
+│   │   │   ├── rlock_demo.py                        # RLock(재진입 가능 락) 실습
+│   │   │   ├── producer_consumer.py                 # 생산자-소비자 문제
+│   │   │   ├── dining_philosophers.py               # 철학자들의 만찬 문제
+│   │   │   ├── readers_writers.py                   # 독자-작가 문제
+│   │   │   ├── deadlock_simulator.py                # 데드락 시뮬레이션
+│   │   │   └── deadlock_detector.py                 # 데드락 탐지 및 해결
+│   │   ├── pool/
+│   │   │   ├── __init__.py
+│   │   │   ├── custom_thread_pool.py                # 커스텀 스레드 풀 구현
+│   │   │   ├── thread_pool_executor_demo.py         # ThreadPoolExecutor 실습
+│   │   │   ├── process_pool_executor_demo.py        # ProcessPoolExecutor 실습
+│   │   │   ├── async_pool_demo.py                   # 비동기 작업 풀
+│   │   │   ├── work_queue.py                        # 작업 큐 구현
+│   │   │   └── thread_pool_monitor.py               # 스레드 풀 모니터링
+│   │   ├── scheduling/
+│   │   │   ├── __init__.py
+│   │   │   ├── fcfs_scheduler.py                    # First-Come First-Served 구현
+│   │   │   ├── sjf_scheduler.py                     # Shortest Job First 구현
+│   │   │   ├── round_robin_scheduler.py             # Round Robin 구현
+│   │   │   ├── priority_scheduler.py                # Priority 스케줄링 구현
+│   │   │   ├── mlfq_scheduler.py                    # Multi-Level Feedback Queue 구현
+│   │   │   └── scheduler_comparison.py              # 스케줄러 성능 비교
+│   │   └── async_patterns/
+│   │       ├── __init__.py
+│   │       ├── async_context_manager.py             # 비동기 컨텍스트 매니저
+│   │       ├── async_generator.py                   # 비동기 제너레이터
+│   │       ├── async_queue.py                       # asyncio.Queue 패턴
+│   │       ├── async_lock.py                        # 비동기 락 패턴
+│   │       ├── gather_pattern.py                    # asyncio.gather 패턴
+│   │       ├── task_group.py                        # TaskGroup 패턴 (Python 3.11+)
+│   │       └── structured_concurrency.py            # 구조화된 동시성 패턴
+│   ├── comparison/
+│   │   ├── __init__.py
+│   │   ├── performance/
+│   │   │   ├── __init__.py
+│   │   │   ├── creation_benchmark.py                # 생성 시간 벤치마크
+│   │   │   ├── context_switch_benchmark.py          # 컨텍스트 스위칭 벤치마크
+│   │   │   ├── io_benchmark.py                      # I/O 작업 벤치마크
+│   │   │   ├── cpu_benchmark.py                     # CPU 집약 작업 벤치마크
+│   │   │   ├── scalability_test.py                  # 확장성 테스트
+│   │   │   └── throughput_analyzer.py               # 처리량 분석
+│   │   ├── resource/
+│   │   │   ├── __init__.py
+│   │   │   ├── memory_usage_analyzer.py             # 메모리 사용량 분석
+│   │   │   ├── cpu_usage_analyzer.py                # CPU 사용률 분석
+│   │   │   ├── resource_profiler.py                 # 리소스 프로파일링
+│   │   │   ├── resource_comparison.py               # 리소스 사용량 비교
+│   │   │   └── gil_impact_analyzer.py               # GIL 영향 분석
+│   │   └── concurrency/
+│   │       ├── __init__.py
+│   │       ├── concurrent_task_executor.py          # 동시 작업 실행 비교
+│   │       ├── parallelism_analyzer.py              # 병렬성 분석
+│   │       ├── race_condition_detector.py           # 경쟁 조건 탐지
+│   │       ├── concurrency_patterns.py              # 동시성 패턴 비교
+│   │       └── async_vs_thread_comparison.py        # asyncio vs threading 비교
+│   ├── common/
+│   │   ├── __init__.py
+│   │   ├── utils/
+│   │   │   ├── __init__.py
+│   │   │   ├── system_info.py                       # 시스템 정보 조회
+│   │   │   ├── time_utils.py                        # 시간 측정 유틸리티
+│   │   │   ├── random_data_generator.py             # 테스트 데이터 생성
+│   │   │   ├── file_utils.py                        # 파일 작업 유틸리티
+│   │   │   ├── report_generator.py                  # 보고서 생성
+│   │   │   └── decorators.py                        # 유용한 데코레이터들
+│   │   ├── monitor/
+│   │   │   ├── __init__.py
+│   │   │   ├── base_monitor.py                      # 모니터링 기본 클래스
+│   │   │   ├── metrics_collector.py                 # 메트릭 수집기
+│   │   │   ├── performance_monitor.py               # 성능 모니터
+│   │   │   ├── prometheus_metrics.py                # Prometheus 메트릭
+│   │   │   └── dashboard_server.py                  # 모니터링 대시보드 서버
+│   │   └── models/
+│   │       ├── __init__.py
+│   │       ├── process_model.py                     # 프로세스 데이터 모델
+│   │       ├── thread_model.py                      # 스레드 데이터 모델
+│   │       └── metrics_model.py                     # 메트릭 데이터 모델
+│   └── demo/
+│       ├── __init__.py
+│       ├── demo_runner.py                           # 데모 실행 관리자
+│       ├── process_demos.py                         # 프로세스 데모 모음
+│       ├── thread_demos.py                          # 스레드 데모 모음
+│       └── comparison_demos.py                      # 비교 데모 모음
 ├── tests/
-│   ├── conftest.py                # pytest 설정 및 fixtures
-│   ├── unit/                      # 단위 테스트
-│   ├── integration/               # 통합 테스트
-│   └── benchmark/                 # 성능 벤치마크
+│   ├── __init__.py
+│   ├── conftest.py                                  # pytest 설정 및 fixtures
+│   ├── unit/
+│   │   ├── __init__.py
+│   │   ├── process/
+│   │   │   ├── __init__.py
+│   │   │   ├── creation/
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── test_process_creator.py          # ProcessCreator 테스트
+│   │   │   │   ├── test_process_factory.py          # ProcessFactory 테스트
+│   │   │   │   └── test_process_spawner.py          # ProcessSpawner 테스트
+│   │   │   ├── communication/
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── test_socket_ipc.py               # 소켓 IPC 테스트
+│   │   │   │   ├── test_pipe_ipc.py                 # 파이프 IPC 테스트
+│   │   │   │   ├── test_queue_ipc.py                # 큐 IPC 테스트
+│   │   │   │   └── test_shared_memory_ipc.py        # 공유 메모리 테스트
+│   │   │   ├── monitoring/
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── test_process_monitor.py          # 프로세스 모니터링 테스트
+│   │   │   │   └── test_process_resource_tracker.py # 리소스 추적 테스트
+│   │   │   └── management/
+│   │   │       ├── __init__.py
+│   │   │       ├── test_process_manager.py          # 프로세스 관리 테스트
+│   │   │       └── test_process_pool.py             # 프로세스 풀 테스트
+│   │   ├── thread/
+│   │   │   ├── __init__.py
+│   │   │   ├── lifecycle/
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── test_thread_state.py             # 스레드 상태 테스트
+│   │   │   │   ├── test_native_thread.py            # threading 모듈 테스트
+│   │   │   │   └── test_async_task.py               # asyncio 태스크 테스트
+│   │   │   ├── synchronization/
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── test_mutex.py                    # 뮤텍스 테스트
+│   │   │   │   ├── test_semaphore.py                # 세마포어 테스트
+│   │   │   │   ├── test_producer_consumer.py        # 생산자-소비자 테스트
+│   │   │   │   ├── test_deadlock_simulator.py       # 데드락 시뮬레이터 테스트
+│   │   │   │   └── test_deadlock_detector.py        # 데드락 탐지 테스트
+│   │   │   ├── pool/
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── test_custom_thread_pool.py       # 커스텀 풀 테스트
+│   │   │   │   ├── test_thread_pool_executor.py     # ThreadPoolExecutor 테스트
+│   │   │   │   └── test_async_pool.py               # 비동기 풀 테스트
+│   │   │   └── scheduling/
+│   │   │       ├── __init__.py
+│   │   │       ├── test_fcfs_scheduler.py           # FCFS 알고리즘 테스트
+│   │   │       ├── test_sjf_scheduler.py            # SJF 알고리즘 테스트
+│   │   │       ├── test_round_robin_scheduler.py    # Round Robin 테스트
+│   │   │       └── test_scheduler_comparison.py     # 스케줄러 비교 테스트
+│   │   └── comparison/
+│   │       ├── __init__.py
+│   │       ├── performance/
+│   │       │   ├── __init__.py
+│   │       │   ├── test_creation_benchmark.py       # 생성 벤치마크 테스트
+│   │       │   └── test_scalability.py              # 확장성 테스트
+│   │       ├── resource/
+│   │       │   ├── __init__.py
+│   │       │   └── test_resource_analyzer.py        # 리소스 분석기 테스트
+│   │       └── concurrency/
+│   │           ├── __init__.py
+│   │           └── test_race_condition_detector.py  # 경쟁 조건 탐지 테스트
+│   ├── integration/
+│   │   ├── __init__.py
+│   │   ├── test_process_integration.py              # 프로세스 통합 테스트
+│   │   ├── test_thread_integration.py               # 스레드 통합 테스트
+│   │   ├── test_api_integration.py                  # API 통합 테스트
+│   │   └── test_ipc_integration.py                  # IPC 통합 테스트
+│   ├── benchmark/
+│   │   ├── __init__.py
+│   │   ├── bench_process_creation.py                # 프로세스 생성 벤치마크
+│   │   ├── bench_thread_creation.py                 # 스레드 생성 벤치마크
+│   │   ├── bench_context_switch.py                  # 컨텍스트 스위치 벤치마크
+│   │   ├── bench_ipc_performance.py                 # IPC 성능 벤치마크
+│   │   └── bench_gil_impact.py                      # GIL 영향 벤치마크
+│   └── load/
+│       ├── __init__.py
+│       ├── locustfile.py                            # Locust 부하 테스트
+│       └── stress_test.py                           # 스트레스 테스트
 ├── docs/
-│   ├── api/                       # API 문서
-│   └── tutorials/                 # 튜토리얼
+│   ├── api/
+│   │   ├── openapi.json                             # OpenAPI 스펙
+│   │   └── postman_collection.json                  # Postman 컬렉션
+│   ├── architecture/
+│   │   ├── system_design.md                         # 시스템 설계 문서
+│   │   ├── component_diagram.md                     # 컴포넌트 다이어그램
+│   │   └── sequence_diagrams.md                     # 시퀀스 다이어그램
+│   ├── experiments/
+│   │   ├── 01_process_isolation.md                  # 프로세스 격리 실험
+│   │   ├── 02_gil_impact.md                         # GIL 영향 실험
+│   │   ├── 03_async_vs_thread.md                    # async vs thread 실험
+│   │   ├── 04_deadlock_scenarios.md                 # 데드락 시나리오 실험
+│   │   └── 05_performance_comparison.md             # 성능 비교 실험
+│   ├── tutorials/
+│   │   ├── getting_started.md                       # 시작 가이드
+│   │   ├── process_tutorial.md                      # 프로세스 튜토리얼
+│   │   ├── thread_tutorial.md                       # 스레드 튜토리얼
+│   │   └── async_tutorial.md                        # 비동기 프로그래밍 튜토리얼
+│   └── results/
+│       ├── benchmark_results.md                     # 벤치마크 결과
+│       ├── performance_analysis.md                  # 성능 분석 보고서
+│       └── charts/                                  # 결과 차트
+│           ├── creation_time_comparison.png
+│           ├── memory_usage_comparison.png
+│           └── throughput_analysis.png
 ├── scripts/
-│   └── *.bat                      # Windows 실행 스크립트
-├── requirements.txt               # 프로덕션 의존성
-├── requirements-dev.txt           # 개발 의존성
-├── pyproject.toml                 # 프로젝트 메타데이터
-├── .env.example                   # 환경변수 예제
-└── README.md                      # 프로젝트 문서
+│   ├── run_app.py                                   # 애플리케이션 실행 스크립트
+│   ├── run_demo.py                                  # 데모 실행 스크립트
+│   ├── run_benchmark.py                             # 벤치마크 실행 스크립트
+│   ├── generate_report.py                           # 보고서 생성 스크립트
+│   ├── setup_environment.py                         # 환경 설정 스크립트
+│   ├── run-python.bat                               # Windows 실행 배치
+│   ├── run-demo.bat                                 # Windows 데모 배치
+│   ├── run-benchmark.bat                            # Windows 벤치마크 배치
+│   └── run-tests.bat                                # Windows 테스트 배치
+├── configs/
+│   ├── logging.yaml                                 # 로깅 설정
+│   ├── benchmark.yaml                               # 벤치마크 설정
+│   └── demo.yaml                                    # 데모 설정
+├── logs/                                             # 로그 디렉토리
+│   ├── app.log
+│   ├── process.log
+│   └── thread.log
+├── data/                                             # 데이터 디렉토리
+│   ├── input/                                       # 입력 데이터
+│   ├── output/                                      # 출력 데이터
+│   └── temp/                                        # 임시 파일
+├── .env                                              # 환경 변수
+├── .env.example                                      # 환경 변수 예제
+├── .gitignore                                        # Git ignore 파일
+├── .dockerignore                                     # Docker ignore 파일
+├── Dockerfile                                        # Docker 이미지 정의
+├── docker-compose.yml                                # Docker Compose 설정
+├── requirements.txt                                  # 프로덕션 의존성
+├── requirements-dev.txt                              # 개발 의존성
+├── pyproject.toml                                    # 프로젝트 메타데이터
+├── setup.py                                          # 패키지 설정
+├── setup.cfg                                         # 설정 파일
+├── pytest.ini                                        # pytest 설정
+├── .ruff.toml                                        # Ruff 린터 설정
+├── .mypy.ini                                         # mypy 타입 체커 설정
+├── Makefile                                          # Make 명령어
+├── README.md                                         # 프로젝트 문서
+└── LICENSE                                           # 라이센스 파일
 ```
 
 ## 실행 방법
