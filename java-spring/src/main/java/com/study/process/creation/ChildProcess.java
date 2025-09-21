@@ -13,15 +13,25 @@ public class ChildProcess {
         if(args.length == 0){
             System.out.println("Performing default task");
         } else {
-            if(args.length>1){
-                StringBuilder message = new StringBuilder();
-                for (int i =1; i<args.length;i++){
-                    if(i>1) message.append(" ");
-                    message.append(args[i]);
+            if(args[0]=="ECHO") {
+                if (args.length > 1) {
+                    StringBuilder message = new StringBuilder();
+                    for (int i = 1; i < args.length; i++) {
+                        if (i > 1) message.append(" ");
+                        message.append(args[i]);
+                    }
+                    System.out.println("ECHO: " + message);
                 }
-                System.out.println("ECHO: "+message);
+            }else if(args[0]=="COMPUTE"){
+                if(args.length>1){
+                    try{
+                        int n = Integer.parseInt(args[1]);
+                        System.out.println("Computing sum");
+                    }catch (NumberFormatException e) {
+                        System.err.println("Invalid number: " + args[1]);
+                    }
+                }
             }
-
         }
         System.out.println("Child process completed");
     }

@@ -119,4 +119,18 @@ class ChildProcessTest {
         String output = outputStream.toString();
         assertThat(output).contains("ECHO: Hello World");
     }
+
+    @Test
+    @DisplayName("9. COMPUTE 모드를 인식한다.")
+    void shouldRecognizeComputeMode(){
+        //given
+        String[] args = {"COMPUTE","10"};
+
+        //when
+        ChildProcess.main(args);
+
+        //then
+        String output = outputStream.toString();
+        assertThat(output).contains("Computing sum");
+    }
 }
