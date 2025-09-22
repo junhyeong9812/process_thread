@@ -40,5 +40,23 @@ class TestProcessStatus :
         ]
         for status in expected_statuses:
             assert hasattr(ProcessStatus, status)
+
+    def test_is_active_status(self):
+        """ 활성 상태 판별 메서드 테스트 """
+        assert ProcessStatus.INITIALIZED.is_active() == True
+        assert ProcessStatus.RUNNING.is_active() == True
+        assert ProcessStatus.COMPLETED.is_active() == False
+        assert ProcessStatus.TERMINATED.is_active() == False
+        assert ProcessStatus.KILLED.is_active() == False
+        
+
+    def test_is_finished_status(self):
+        """ 종료 상태 판별 메서드 테스트 """
+        assert ProcessStatus.COMPLETED.is_finished() == True
+        assert ProcessStatus.TERMINATED.is_finished() == True
+        assert ProcessStatus.KILLED.is_finished() == True
+        assert ProcessStatus.ERROR.is_finished() == True
+        assert ProcessStatus.RUNNING.is_finished() == False
+        
     
 
