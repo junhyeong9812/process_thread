@@ -60,7 +60,11 @@ public class ChildProcess {
                 }
 
                 String filename = args[1];
-                String content =args[2];
+                StringBuilder content = new StringBuilder();
+                for(int i=2;i<args.length;i++){
+                    if(i>2) content.append(" ");
+                    content.append(args[i]);
+                }
                 try {
                     Path filePath = Paths.get(filename);
                     Files.writeString(filePath,content);
@@ -70,6 +74,21 @@ public class ChildProcess {
                 }
                 break;
 
+            case "SLEEP":
+                if(args.length < 2 ){
+                    System.out.println("SLEEP mode requires duration in milliseconds");
+                    return;
+                }
+
+                try{
+                    int mills = Integer.parseInt(args[1]);
+                    System.out.println("Sleeping for "+mills+" ms");
+                    Thread.sleep(mills);
+                    System.out.println("Woke up after "+mills+" ms");
+                }catch (InterruptedException e){
+                    Thread.currentThread().interrupt();
+                    System.out.println("Sleep interrupted");
+                }
         }
     }
 }

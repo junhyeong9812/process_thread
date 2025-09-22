@@ -8,7 +8,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.*;
@@ -181,5 +183,34 @@ class ChildProcessTest {
 
         //then
         assertThat(file).exists();
+    }
+
+    @Test
+    @DisplayName("13. FILE 모드에서 파일에 내용을 쓴다.")
+    void shouldWriteContentToFile(@TempDir Path tempDir) throws IOException{
+        //given
+        Path file = tempDir.resolve("test.txt");
+        String[] args = {"FILE",file.toString(),"test","content"};
+
+        //when
+        ChildProcess.main(args);
+
+        //then
+        String content = Files.readString(file);
+        assertThat(content).isEqualTo("test content");
+    }
+
+    @Test
+    @DisplayName("14. SLEEP 모드를 인식한다.")
+    void shouldRecognizeSleepMode(){
+        //given
+        String[] args = {"SLEEP","10"};
+
+        //when
+        ChildProcess.main(args);
+
+        //then
+        String output = outputStream.toString();
+        assertThat(output).contains("Sleeping for 10 ms");
     }
 }
