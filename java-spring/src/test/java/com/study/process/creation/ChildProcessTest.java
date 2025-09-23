@@ -213,4 +213,19 @@ class ChildProcessTest {
         String output = outputStream.toString();
         assertThat(output).contains("Sleeping for 10 ms");
     }
+
+    @Test
+    @DisplayName("15. SLEEP모드에서 실제로 대기한다.")
+    void shouldActuallySleep(){
+        //given
+        String[] args = {"SLEEP","50"};
+
+        //when
+        long startTime =System.currentTimeMillis();
+        ChildProcess.main(args);
+        long endTime = System.currentTimeMillis();
+
+        //then
+        assertThat(endTime - startTime).isGreaterThanOrEqualTo(50);
+    }
 }
