@@ -243,5 +243,17 @@ class ChildProcessTest {
         assertThat(output).contains("Simulating error with code: 42");
     }
 
+    @Test
+    @DisplayName("17. 알 수 없는 모드를 처리한다.")
+    void shouldHandleUnknownMode(){
+        //given
+        String[] args = {"UNKNOWN"};
 
+        //when
+        ChildProcess.main(args);
+
+        //then
+        String output = outputStream.toString();
+        assertThat(output).contains("Unknown mode: UNKNOWN");
+    }
 }

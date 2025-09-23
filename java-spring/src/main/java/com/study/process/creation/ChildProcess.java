@@ -96,6 +96,10 @@ public class ChildProcess {
                 }
                 int errorCode = Integer.parseInt(args[1]);
                 System.out.println("Simulating error with code: "+errorCode);
+            default:
+                System.out.println("Unknown mode: "+ mode);
+                break;
+
         }
     }
 }
