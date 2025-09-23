@@ -6,6 +6,7 @@
 
 import logging
 from enum import Enum
+from typing import Dict,List,Optional,Tuple,Any,Union
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +38,13 @@ class ProcessCreator :
     pass
 
 class ProcessInfo :
+    """ 프로세스 정보 데이터 클래스"""
+    pid : int
+    command = List[str]
+    popen: Optional[subprocess.Popen] = None
+    status:ProcessStatus = ProcessStatus.INITIALIZED
+    
+
     pass
 
 class ProcessCreationError :

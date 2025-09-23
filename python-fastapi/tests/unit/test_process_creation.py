@@ -58,5 +58,17 @@ class TestProcessStatus :
         assert ProcessStatus.ERROR.is_finished() == True
         assert ProcessStatus.RUNNING.is_finished() == False
         
+class TestProcessInfo:
+    """ProcessInfo 데이터 클래스 테스트"""
     
+    def test_process_info_creation_minimal(self):
+        """최소 정보로 ProcessInfo 생성"""
+        info = ProcessInfo(pid=12345, command=["python","--version"])
+
+        assert info.pid == 12345
+        assert info.command == ["python","--version"]
+        assert info.status == ProcessStatus.INITIALIZED
+        assert info.popen is None
+        assert info.created_at is None
+        assert info.ended_at is None
 
