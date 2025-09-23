@@ -89,6 +89,13 @@ public class ChildProcess {
                     Thread.currentThread().interrupt();
                     System.out.println("Sleep interrupted");
                 }
+            case "ERROR":
+                if(args.length < 2){
+                    System.out.println("ERROR mode requires error code");
+                    return;
+                }
+                int errorCode = Integer.parseInt(args[1]);
+                System.out.println("Simulating error with code: "+errorCode);
         }
     }
 }

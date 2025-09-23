@@ -228,4 +228,20 @@ class ChildProcessTest {
         //then
         assertThat(endTime - startTime).isGreaterThanOrEqualTo(50);
     }
+
+    @Test
+    @DisplayName("16. ERROR 모드를 인식한다.")
+    void shouldRecognizeErrorMode(){
+        //given
+        String[] args ={"ERROR","42"};
+
+        //when
+        ChildProcess.main(args);
+
+        //then
+        String output = outputStream.toString();
+        assertThat(output).contains("Simulating error with code: 42");
+    }
+
+
 }
