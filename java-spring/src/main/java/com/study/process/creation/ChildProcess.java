@@ -1,5 +1,6 @@
 package com.study.process.creation;
 
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,78 +29,119 @@ public class ChildProcess {
     private static void excuteMode(String mode,String[] args){
         switch (mode){
             case "ECHO":
-                if (args.length > 1) {
-                    StringBuilder message = new StringBuilder();
-                    for (int i = 1; i < args.length; i++) {
-                        if (i > 1) message.append(" ");
-                        message.append(args[i]);
-                    }
-                    System.out.println("ECHO: " + message);
-                }
+                executeEcho(args);
                 break;
             case "COMPUTE":
-                if(args.length>1){
-                    try{
-                        int n = Integer.parseInt(args[1]);
-                        System.out.println("Computing sum from 1 to " +n);
-
-                        long sum = 0;
-                        for(int i = 1;i<=n;i++){
-                            sum += i;
-                        }
-                        System.out.println("Result: "+sum);
-                    }catch (NumberFormatException e) {
-                        System.err.println("Invalid number: " + args[1]);
-                    }
-                }
+                executeCompute(args);
                 break;
             case "FILE":
-                if(args.length < 3){
-                    System.out.println("FILE mode requires filename and content");
-                    return;
-                }
-
-                String filename = args[1];
-                StringBuilder content = new StringBuilder();
-                for(int i=2;i<args.length;i++){
-                    if(i>2) content.append(" ");
-                    content.append(args[i]);
-                }
-                try {
-                    Path filePath = Paths.get(filename);
-                    Files.writeString(filePath,content);
-                    System.out.println("File created"+ filename);
-                }catch (IOException e){
-                    System.err.println("Failed to create file :" +e.getMessage());
-                }
+                executeFile(args);
                 break;
-
             case "SLEEP":
-                if(args.length < 2 ){
-                    System.out.println("SLEEP mode requires duration in milliseconds");
-                    return;
-                }
-
-                try{
-                    int mills = Integer.parseInt(args[1]);
-                    System.out.println("Sleeping for "+mills+" ms");
-                    Thread.sleep(mills);
-                    System.out.println("Woke up after "+mills+" ms");
-                }catch (InterruptedException e){
-                    Thread.currentThread().interrupt();
-                    System.out.println("Sleep interrupted");
-                }
-            case "ERROR":
-                if(args.length < 2){
-                    System.out.println("ERROR mode requires error code");
-                    return;
-                }
-                int errorCode = Integer.parseInt(args[1]);
-                System.out.println("Simulating error with code: "+errorCode);
-            default:
-                System.out.println("Unknown mode: "+ mode);
+                executeSleep(args);
                 break;
+            case "ERROR":
+                executeError(args);
+                break;
+            default:
+                System.out.println("Unknown mode: " + mode);
+                break;
+
 
         }
     }
+    private static void executeEcho(String[] args){
+        StringBuilder message = new StringBuilder("ECHO:");
+
+        if (args.length > 1) {
+            for (int i = 1; i < args.length; i++) {
+                message.append(" ").append(args[i]);
+            }
+        }
+
+        System.out.println(message.toString());
+    }
+
+    private static void executeCompute(String[] args){
+        if (args.length < 2) {
+            System.out.println("Computing sum from 1 to 0");
+            System.out.println("Result: 0");
+            return;
+        }
+
+        try {
+            int n = Integer.parseInt(args[1]);
+            System.out.println("Computing sum from 1 to " + n);
+
+            long sum = 0;
+            for (int i = 1; i <= n; i++) {
+                sum += i;
+            }
+
+            System.out.println("Result: " + sum);
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid number: " + args[1]);
+        }
+
+    }
+
+    private static void executeFile(String[] args){
+        if (args.length < 3) {
+            System.out.println("FILE mode requires filename and content");
+            return;
+        }
+
+        String filename = args[1];
+        StringBuilder content = new StringBuilder();
+
+        for (int i = 2; i < args.length; i++) {
+            if (i > 2) content.append(" ");
+            content.append(args[i]);
+        }
+
+        try (FileWriter writer = new FileWriter(filename)) {
+            writer.write(content.toString());
+            System.out.println("File written: " + filename);
+        } catch (IOException e) {
+            System.err.println("Error writing file: " + e.getMessage());
+        }
+
+    }
+
+    private static void executeSleep(String[] args){
+        if (args.length < 2) {
+            System.out.println("SLEEP mode requires duration in milliseconds");
+            return;
+        }
+
+        try {
+            int millis = Integer.parseInt(args[1]);
+            System.out.println("Sleeping for " + millis + " ms");
+            Thread.sleep(millis);
+            System.out.println("Woke up after " + millis + " ms");
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid number: " + args[1]);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            System.out.println("Sleep interrupted");
+        }
+
+    }
+
+    private static void executeError(String[] args){
+        if (args.length < 2) {
+            System.out.println("ERROR mode requires error code");
+            return;
+        }
+
+        try {
+            int errorCode = Integer.parseInt(args[1]);
+            System.out.println("Simulating error with code: " + errorCode);
+            System.exit(errorCode);
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid error code: " + args[1]);
+        }
+    }
+
 }
+

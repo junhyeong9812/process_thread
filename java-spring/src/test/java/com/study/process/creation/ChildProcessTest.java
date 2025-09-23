@@ -256,4 +256,18 @@ class ChildProcessTest {
         String output = outputStream.toString();
         assertThat(output).contains("Unknown mode: UNKNOWN");
     }
+
+    @Test
+    @DisplayName("18. 모드는 있지만 추가 인자가 없을 때 처리한다.")
+    void shouldHandleModeWithoutRequiredArgs(){
+        //given
+        String[] args = {"COMPUTE"};
+
+        //when
+        ChildProcess.main(args);
+
+        //then
+        String output = outputStream.toString();
+        assertThat(output).doesNotContain("Exception");
+    }
 }
