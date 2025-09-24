@@ -44,4 +44,32 @@ class ProcessCreatorTest {
         //then
         assertThat(creator.getArguments()).containsExactly("hello");
     }
+
+    @Test
+    @DisplayName("4. 여러 인자를 추가할 수 있다.")
+    void shouldAddMultipleArguments() {
+        //given
+        creator.setCommand("echo");
+
+        //when
+        creator.addArgument("hello");
+        creator.addArgument("world");
+
+        //then
+        assertThat(creator.getArguments()).containsExactly("hello","world");
+    }
+
+    @Test
+    @DisplayName("5.ProcessBuilder를 생성할 수 있다.")
+    void shouldCreateProcessBuilder() {
+        //given
+        creator.setCommand("echo");
+
+        //when
+        ProcessBuilder builder = creator.createProcessBuilder();
+
+        //then
+        assertThat(builder).isNotNull();
+        assertThat(builder.command()).containsExactly("echo");
+    }
 }
