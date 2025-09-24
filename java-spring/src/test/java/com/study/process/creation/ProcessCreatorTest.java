@@ -31,4 +31,17 @@ class ProcessCreatorTest {
         //then
         assertThat(creator.getCommand()).isEqualTo("echo");
     }
+
+    @Test
+    @DisplayName("3. 인자를 추가할 수 있다.")
+    void shouldAddArgument(){
+        //given
+        creator.setCommand("echo");
+
+        //when
+        creator.addArgument("hello");
+
+        //then
+        assertThat(creator.getArguments()).containsExactly("hello");
+    }
 }
