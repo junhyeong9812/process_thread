@@ -63,12 +63,12 @@ class TestProcessInfo:
     
     def test_process_info_creation_minimal(self):
         """최소 정보로 ProcessInfo 생성"""
-        info = ProcessInfo(pid=12345, command=["python","--version"])
-
+        info = ProcessInfo(pid=12345, command=["python", "--version"])
+        
         assert info.pid == 12345
-        assert info.command == ["python","--version"]
+        assert info.command == ["python", "--version"]
         assert info.status == ProcessStatus.INITIALIZED
         assert info.popen is None
-        assert info.created_at is None
+        assert info.created_at is not None
         assert info.ended_at is None
 

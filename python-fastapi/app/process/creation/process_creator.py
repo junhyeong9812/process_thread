@@ -4,9 +4,20 @@
 
 """
 
+import subprocess
+import os
+import sys
+import signal
 import logging
+import threading
+import time
+import psutil
 from enum import Enum
-from typing import Dict,List,Optional,Tuple,Any,Union
+from dataclasses import dataclass, field
+from typing import Dict, List, Optional, Tuple, Any, Union
+from datetime import datetime
+from contextlib import contextmanager
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -37,13 +48,21 @@ class ProcessStatus(Enum) :
 class ProcessCreator :
     pass
 
+@dataclass
 class ProcessInfo :
     """ 프로세스 정보 데이터 클래스"""
     pid : int
-    command = List[str]
+    command : List[str]
     popen: Optional[subprocess.Popen] = None
     status:ProcessStatus = ProcessStatus.INITIALIZED
-    
+    created_at: datetime = field(default_factory = datetime.now)
+    ended_at: Optional[datetime] =None
+    env: Optional[Dict[str,str]]=None
+    cwd: Optional[str] = None
+    stdout: Optional[str] = None
+    stderr: Optional[str] = None
+    exit_code:Optional[int] = None
+    resource_limits:Optional[Dict[str, Any]] = None
 
     pass
 
