@@ -1,10 +1,8 @@
 package com.study.process.creation;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * ProcessBuilder를 활용한 프로세스 생성 및 관리 클래스
@@ -62,6 +60,58 @@ public class ProcessCreator {
         return builder;
     }
 
+    /**
+     * 프로세스 시작
+     * */
+    public Process start() throws IOException {
+        if(command == null) {
+            throw new IllegalStateException("Command not set");
+        }
+
+        ProcessBuilder builder = createProcessBuilder();
+        return builder.start();
+    }
+
+    /**
+     * java 프로세스 생성
+     * */
+    public Process createJavaProcess(String className, String[] args)
+        throws IOException {
+
+        //java 실행 명령 구성
+        String javaHome = System.getProperty("java.home");
+        String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
+
+        //클래스패스
+        String classpath = System.getProperty("java.class.path");
+
+        //명령어 구성
+        List<String> fullCommand = new ArrayList<>();
+        fullCommand.add(javaBin);
+        fullCommand.add("-cp");
+        fullCommand.add(classpath);
+        fullCommand.add(className);
+
+        //프로그램 인자 추가
+        if(args != null){
+            fullCommand.addAll(Arrays.asList(args));
+        }
+
+        //ProcessBuilder 생성
+        ProcessBuilder builder = new ProcessBuilder(fullCommand);
+
+        if(workingDirectory != null) {
+            builder.directory(workingDirectory);
+        }
+
+        if(!environmentVariables.isEmpty()){
+            builder.environment().putAll(environmentVariables);
+        }
+
+        builder.redirectErrorStream(true);
+
+        return builder.start();
+    }
 
 
 }
