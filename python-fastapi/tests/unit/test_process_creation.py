@@ -72,3 +72,27 @@ class TestProcessInfo:
         assert info.created_at is not None
         assert info.ended_at is None
 
+    def test_process_into_with_all_fields(self):
+        """모든 필드를 포함한 ProcessInfo 생성"""
+        mock_popen = Mock()
+        mock_popen.pid = 12345
+
+        info = ProcessInfo(
+            pid = 12345,
+            command=["python","script.py"],
+            popen = mock_popen,
+            status= ProcessStatus.RUNNING,
+            env={"TEST": "value"},
+            cwd= "/tmp",
+            stdout = "output",
+            stderr= "error",
+            exit_code=0
+        )
+
+        assert info.popen == mock_popen
+        assert info.env =={"TEST":"value"}
+        assert info.cwd == "/tmp"
+        assert info.stdout == "output"
+        assert info.stderr == "error"
+        assert info.exit_code == 0
+
