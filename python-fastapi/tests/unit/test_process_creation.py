@@ -96,3 +96,10 @@ class TestProcessInfo:
         assert info.stderr == "error"
         assert info.exit_code == 0
 
+    def test_is_alive_with_running_process(self):
+        """실행 중인 프로세스의 is_alive() 테스트"""
+        mock_popen =Mock();
+        mock_popen.poll.return_value = 0; #종료됨
+
+        info = ProcessInfo(pid=12345,command=["test"],popen=mock_popen)
+        assert info.is_alive() == False

@@ -64,6 +64,11 @@ class ProcessInfo :
     exit_code:Optional[int] = None
     resource_limits:Optional[Dict[str, Any]] = None
 
+    def is_alive(self) -> bool:
+        """프로세스가 살아있는지 확인"""
+        if self.popen:
+            return self.popen.poll() is None
+        return False
     pass
 
 class ProcessCreationError :
