@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.study.process.creation.ChildProcessTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2025-09-21T20:54:53" hostname="JUN" time="0.07">
-  <properties/>
-  <testcase name="12. FILE 모드를 인식한다." classname="com.study.process.creation.ChildProcessTest" time="0.07"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>
