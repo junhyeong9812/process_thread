@@ -169,292 +169,288 @@ public class SharedMemoryIPC {
             }
         }
 
-        /**
-         * 공유 메모리 큐 구현
-         */
-        public static class SharedMemoryQueue {
-            private final SharedMemorySegment segment;
-            private final int capacity;
-            private final int itemSize;
-            private final AtomicInteger head;
-            private final AtomicInteger tail;
-            private final AtomicInteger count;
-            private final Semaphore notEmpty;
-            private final Semaphore notFull;
+        public String getSegmentName() { return segmentName; }
+        public int getSize() { return size; }
+        public boolean isCreator() { return isCreator; }
+    }
 
-            // 큐 메타데이터 오프셋
-            private static final int META_SIZE = 16;
-            private static final int HEAD_OFFSET = 0;
-            private static final int TAIL_OFFSET = 4;
-            private static final int COUNT_OFFSET = 8;
+    /**
+     * 공유 메모리 큐 구현
+     */
+    public static class SharedMemoryQueue {
+        private final SharedMemorySegment segment;
+        private final int capacity;
+        private final int itemSize;
+        private final AtomicInteger head;
+        private final AtomicInteger tail;
+        private final AtomicInteger count;
+        private final Semaphore notEmpty;
+        private final Semaphore notFull;
 
-            public SharedMemoryQueue(String name, int capacity, int itemSize, boolean create)
-                    throws IOException {
-                this.capacity = capacity;
-                this.itemSize = itemSize;
+        // 큐 메타데이터 오프셋
+        private static final int META_SIZE = 16;
+        private static final int HEAD_OFFSET = 0;
+        private static final int TAIL_OFFSET = 4;
+        private static final int COUNT_OFFSET = 8;
 
-                int totalSize = META_SIZE + (capacity * itemSize);
-                this.segment = new SharedMemorySegment(name, totalSize, create);
+        public SharedMemoryQueue(String name, int capacity, int itemSize, boolean create)
+                throws IOException {
+            this.capacity = capacity;
+            this.itemSize = itemSize;
 
-                if (create) {
-                    // 메타데이터 초기화
-                    segment.buffer.putInt(HEAD_OFFSET, 0);
-                    segment.buffer.putInt(TAIL_OFFSET, 0);
-                    segment.buffer.putInt(COUNT_OFFSET, 0);
+            int totalSize = META_SIZE + (capacity * itemSize);
+            this.segment = new SharedMemorySegment(name, totalSize, create);
+
+            if (create) {
+                // 메타데이터 초기화
+                segment.buffer.putInt(HEAD_OFFSET, 0);
+                segment.buffer.putInt(TAIL_OFFSET, 0);
+                segment.buffer.putInt(COUNT_OFFSET, 0);
+            }
+
+            this.head = new AtomicInteger(segment.buffer.getInt(HEAD_OFFSET));
+            this.tail = new AtomicInteger(segment.buffer.getInt(TAIL_OFFSET));
+            this.count = new AtomicInteger(segment.buffer.getInt(COUNT_OFFSET));
+
+            this.notEmpty = new Semaphore(0);
+            this.notFull = new Semaphore(capacity);
+        }
+
+        public void enqueue(byte[] item) throws InterruptedException {
+            if (item.length > itemSize) {
+                throw new IllegalArgumentException("Item exceeds maximum size");
+            }
+
+            notFull.acquire();
+
+            synchronized (segment) {
+                int tailPos = tail.get();
+                int offset = META_SIZE + (tailPos * itemSize);
+
+                // 아이템 쓰기
+                segment.buffer.position(offset);
+                segment.buffer.put(item);
+
+                // 패딩 (아이템 크기가 작은 경우)
+                if (item.length < itemSize) {
+                    byte[] padding = new byte[itemSize - item.length];
+                    segment.buffer.put(padding);
                 }
 
-                this.head = new AtomicInteger(segment.buffer.getInt(HEAD_OFFSET));
-                this.tail = new AtomicInteger(segment.buffer.getInt(TAIL_OFFSET));
-                this.count = new AtomicInteger(segment.buffer.getInt(COUNT_OFFSET));
+                // 메타데이터 업데이트
+                tail.set((tailPos + 1) % capacity);
+                count.incrementAndGet();
 
-                this.notEmpty = new Semaphore(0);
-                this.notFull = new Semaphore(capacity);
+                segment.buffer.putInt(TAIL_OFFSET, tail.get());
+                segment.buffer.putInt(COUNT_OFFSET, count.get());
+                segment.buffer.force();
             }
 
-            public void enqueue(byte[] item) throws InterruptedException {
-                if (item.length > itemSize) {
-                    throw new IllegalArgumentException("Item exceeds maximum size");
-                }
+            notEmpty.release();
+        }
 
-                notFull.acquire();
+        public byte[] dequeue() throws InterruptedException {
+            notEmpty.acquire();
 
-                synchronized (segment) {
-                    int tailPos = tail.get();
-                    int offset = META_SIZE + (tailPos * itemSize);
+            byte[] item;
+            synchronized (segment) {
+                int headPos = head.get();
+                int offset = META_SIZE + (headPos * itemSize);
 
-                    // 아이템 쓰기
-                    segment.buffer.position(offset);
-                    segment.buffer.put(item);
+                // 아이템 읽기
+                item = new byte[itemSize];
+                segment.buffer.position(offset);
+                segment.buffer.get(item);
 
-                    // 패딩 (아이템 크기가 작은 경우)
-                    if (item.length < itemSize) {
-                        byte[] padding = new byte[itemSize - item.length];
-                        segment.buffer.put(padding);
-                    }
+                // 메타데이터 업데이트
+                head.set((headPos + 1) % capacity);
+                count.decrementAndGet();
 
-                    // 메타데이터 업데이트
-                    tail.set((tailPos + 1) % capacity);
-                    count.incrementAndGet();
-
-                    segment.buffer.putInt(TAIL_OFFSET, tail.get());
-                    segment.buffer.putInt(COUNT_OFFSET, count.get());
-                    segment.buffer.force();
-                }
-
-                notEmpty.release();
+                segment.buffer.putInt(HEAD_OFFSET, head.get());
+                segment.buffer.putInt(COUNT_OFFSET, count.get());
+                segment.buffer.force();
             }
 
-            public byte[] dequeue() throws InterruptedException {
-                notEmpty.acquire();
+            notFull.release();
+            return item;
+        }
 
-                byte[] item;
-                synchronized (segment) {
-                    int headPos = head.get();
-                    int offset = META_SIZE + (headPos * itemSize);
+        public boolean isEmpty() { return count.get() == 0; }
+        public boolean isFull() { return count.get() == capacity; }
+        public int size() { return count.get(); }
 
-                    // 아이템 읽기
-                    item = new byte[itemSize];
-                    segment.buffer.position(offset);
-                    segment.buffer.get(item);
+        public void close() throws IOException {
+            segment.close();
+        }
+    }
 
-                    // 메타데이터 업데이트
-                    head.set((headPos + 1) % capacity);
-                    count.decrementAndGet();
+    /**
+     * 공유 메모리 맵 구현
+     */
+    public static class SharedMemoryMap {
+        private final SharedMemorySegment segment;
+        private final Map<String, Integer> indexMap;
+        private final int maxEntries;
+        private final int keySize;
+        private final int valueSize;
+        private final ReadWriteLock rwLock;
 
-                    segment.buffer.putInt(HEAD_OFFSET, head.get());
-                    segment.buffer.putInt(COUNT_OFFSET, count.get());
-                    segment.buffer.force();
-                }
+        private static final int ENTRY_COUNT_OFFSET = 0;
+        private static final int METADATA_SIZE = 8;
 
-                notFull.release();
-                return item;
-            }
+        public SharedMemoryMap(String name, int maxEntries, int keySize, int valueSize,
+                               boolean create) throws IOException {
+            this.maxEntries = maxEntries;
+            this.keySize = keySize;
+            this.valueSize = valueSize;
+            this.indexMap = new ConcurrentHashMap<>();
+            this.rwLock = new ReentrantReadWriteLock();
 
-            public boolean isEmpty() {
-                return count.get() == 0;
-            }
+            int entrySize = keySize + valueSize + 1; // +1 for valid flag
+            int totalSize = METADATA_SIZE + (maxEntries * entrySize);
 
-            public boolean isFull() {
-                return count.get() == capacity;
-            }
+            this.segment = new SharedMemorySegment(name, totalSize, create);
 
-            public int size() {
-                return count.get();
-            }
-
-            public void close() throws IOException {
-                segment.close();
+            if (create) {
+                segment.buffer.putInt(ENTRY_COUNT_OFFSET, 0);
+            } else {
+                loadIndex();
             }
         }
 
-        /**
-         * 공유 메모리 맵 구현
-         */
-        public static class SharedMemoryMap {
-            private final SharedMemorySegment segment;
-            private final Map<String, Integer> indexMap;
-            private final int maxEntries;
-            private final int keySize;
-            private final int valueSize;
-            private final ReadWriteLock rwLock;
+        private void loadIndex() {
+            int entryCount = segment.buffer.getInt(ENTRY_COUNT_OFFSET);
+            int entrySize = keySize + valueSize + 1;
 
-            private static final int ENTRY_COUNT_OFFSET = 0;
-            private static final int METADATA_SIZE = 8;
+            for (int i = 0; i < entryCount; i++) {
+                int offset = METADATA_SIZE + (i * entrySize);
+                segment.buffer.position(offset);
 
-            public SharedMemoryMap(String name, int maxEntries, int keySize, int valueSize,
-                                   boolean create) throws IOException {
-                this.maxEntries = maxEntries;
-                this.keySize = keySize;
-                this.valueSize = valueSize;
-                this.indexMap = new ConcurrentHashMap<>();
-                this.rwLock = new ReentrantReadWriteLock();
+                byte valid = segment.buffer.get();
+                if (valid == 1) {
+                    byte[] keyBytes = new byte[keySize];
+                    segment.buffer.get(keyBytes);
 
-                int entrySize = keySize + valueSize + 1; // +1 for valid flag
-                int totalSize = METADATA_SIZE + (maxEntries * entrySize);
-
-                this.segment = new SharedMemorySegment(name, totalSize, create);
-
-                if (create) {
-                    segment.buffer.putInt(ENTRY_COUNT_OFFSET, 0);
-                } else {
-                    loadIndex();
+                    String key = new String(keyBytes, StandardCharsets.UTF_8).trim();
+                    indexMap.put(key, i);
                 }
             }
+        }
 
-            private void loadIndex() {
-                int entryCount = segment.buffer.getInt(ENTRY_COUNT_OFFSET);
+        public void put(String key, byte[] value) {
+            if (key.getBytes(StandardCharsets.UTF_8).length > keySize) {
+                throw new IllegalArgumentException("Key exceeds maximum size");
+            }
+            if (value.length > valueSize) {
+                throw new IllegalArgumentException("Value exceeds maximum size");
+            }
+
+            rwLock.writeLock().lock();
+            try {
+                Integer index = indexMap.get(key);
+
+                if (index == null) {
+                    // 새 엔트리 할당
+                    int entryCount = segment.buffer.getInt(ENTRY_COUNT_OFFSET);
+                    if (entryCount >= maxEntries) {
+                        throw new IllegalStateException("Map is full");
+                    }
+
+                    index = entryCount;
+                    indexMap.put(key, index);
+
+                    segment.buffer.putInt(ENTRY_COUNT_OFFSET, entryCount + 1);
+                }
+
+                // 엔트리 쓰기
                 int entrySize = keySize + valueSize + 1;
+                int offset = METADATA_SIZE + (index * entrySize);
 
-                for (int i = 0; i < entryCount; i++) {
-                    int offset = METADATA_SIZE + (i * entrySize);
-                    segment.buffer.position(offset);
+                segment.buffer.position(offset);
+                segment.buffer.put((byte) 1); // valid flag
 
-                    byte valid = segment.buffer.get();
-                    if (valid == 1) {
-                        byte[] keyBytes = new byte[keySize];
-                        segment.buffer.get(keyBytes);
+                // 키 쓰기 (패딩 포함)
+                byte[] keyBytes = Arrays.copyOf(
+                        key.getBytes(StandardCharsets.UTF_8),
+                        keySize
+                );
+                segment.buffer.put(keyBytes);
 
-                        String key = new String(keyBytes, StandardCharsets.UTF_8).trim();
-                        indexMap.put(key, i);
-                    }
-                }
+                // 값 쓰기 (패딩 포함)
+                byte[] valueBytes = Arrays.copyOf(value, valueSize);
+                segment.buffer.put(valueBytes);
+
+                segment.buffer.force();
+
+            } finally {
+                rwLock.writeLock().unlock();
             }
+        }
 
-            public void put(String key, byte[] value) {
-                if (key.getBytes(StandardCharsets.UTF_8).length > keySize) {
-                    throw new IllegalArgumentException("Key exceeds maximum size");
+        public byte[] get(String key) {
+            rwLock.readLock().lock();
+            try {
+                Integer index = indexMap.get(key);
+                if (index == null) {
+                    return null;
                 }
-                if (value.length > valueSize) {
-                    throw new IllegalArgumentException("Value exceeds maximum size");
+
+                int entrySize = keySize + valueSize + 1;
+                int offset = METADATA_SIZE + (index * entrySize);
+
+                segment.buffer.position(offset);
+                byte valid = segment.buffer.get();
+
+                if (valid != 1) {
+                    return null;
                 }
 
-                rwLock.writeLock().lock();
-                try {
-                    Integer index = indexMap.get(key);
+                // 키 건너뛰기
+                segment.buffer.position(segment.buffer.position() + keySize);
 
-                    if (index == null) {
-                        // 새 엔트리 할당
-                        int entryCount = segment.buffer.getInt(ENTRY_COUNT_OFFSET);
-                        if (entryCount >= maxEntries) {
-                            throw new IllegalStateException("Map is full");
-                        }
+                // 값 읽기
+                byte[] value = new byte[valueSize];
+                segment.buffer.get(value);
 
-                        index = entryCount;
-                        indexMap.put(key, index);
+                return value;
 
-                        segment.buffer.putInt(ENTRY_COUNT_OFFSET, entryCount + 1);
-                    }
+            } finally {
+                rwLock.readLock().unlock();
+            }
+        }
 
-                    // 엔트리 쓰기
+        public void remove(String key) {
+            rwLock.writeLock().lock();
+            try {
+                Integer index = indexMap.remove(key);
+                if (index != null) {
                     int entrySize = keySize + valueSize + 1;
                     int offset = METADATA_SIZE + (index * entrySize);
 
                     segment.buffer.position(offset);
-                    segment.buffer.put((byte) 1); // valid flag
-
-                    // 키 쓰기 (패딩 포함)
-                    byte[] keyBytes = Arrays.copyOf(
-                            key.getBytes(StandardCharsets.UTF_8),
-                            keySize
-                    );
-                    segment.buffer.put(keyBytes);
-
-                    // 값 쓰기 (패딩 포함)
-                    byte[] valueBytes = Arrays.copyOf(value, valueSize);
-                    segment.buffer.put(valueBytes);
-
+                    segment.buffer.put((byte) 0); // invalid flag
                     segment.buffer.force();
-
-                } finally {
-                    rwLock.writeLock().unlock();
                 }
+            } finally {
+                rwLock.writeLock().unlock();
             }
+        }
 
-            public byte[] get(String key) {
-                rwLock.readLock().lock();
-                try {
-                    Integer index = indexMap.get(key);
-                    if (index == null) {
-                        return null;
-                    }
-
-                    int entrySize = keySize + valueSize + 1;
-                    int offset = METADATA_SIZE + (index * entrySize);
-
-                    segment.buffer.position(offset);
-                    byte valid = segment.buffer.get();
-
-                    if (valid != 1) {
-                        return null;
-                    }
-
-                    // 키 건너뛰기
-                    segment.buffer.position(segment.buffer.position() + keySize);
-
-                    // 값 읽기
-                    byte[] value = new byte[valueSize];
-                    segment.buffer.get(value);
-
-                    return value;
-
-                } finally {
-                    rwLock.readLock().unlock();
-                }
+        public boolean containsKey(String key) {
+            rwLock.readLock().lock();
+            try {
+                return indexMap.containsKey(key);
+            } finally {
+                rwLock.readLock().unlock();
             }
+        }
 
-            public void remove(String key) {
-                rwLock.writeLock().lock();
-                try {
-                    Integer index = indexMap.remove(key);
-                    if (index != null) {
-                        int entrySize = keySize + valueSize + 1;
-                        int offset = METADATA_SIZE + (index * entrySize);
+        public int size() {
+            return indexMap.size();
+        }
 
-                        segment.buffer.position(offset);
-                        segment.buffer.put((byte) 0); // invalid flag
-                        segment.buffer.force();
-                    }
-                } finally {
-                    rwLock.writeLock().unlock();
-                }
-            }
-
-            public boolean containsKey(String key) {
-                rwLock.readLock().lock();
-                try {
-                    return indexMap.containsKey(key);
-                } finally {
-                    rwLock.readLock().unlock();
-                }
-            }
-
-            public int size() {
-                return indexMap.size();
-            }
-
-            public void close() throws IOException {
-                segment.close();
-            }
+        public void close() throws IOException {
+            segment.close();
         }
     }
 }
