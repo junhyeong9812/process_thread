@@ -1,4 +1,4 @@
-package com.virtualthread.os.thread.lifecycle;
+package com.study.thread.lifecycle;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
