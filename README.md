@@ -716,17 +716,3 @@ FCFS, SJF, Round Robin 등 스케줄링 알고리즘 구현 및 비교
 ## 라이센스
 
 MIT License
-
-## 기여 가이드
-
-프로젝트 개선을 위한 기여를 환영합니다. 다음 절차를 따라주세요:
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 문의사항
-
-프로젝트 관련 문의사항이 있으시면 Issues를 통해 남겨주세요.~~
