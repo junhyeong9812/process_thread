@@ -1,4 +1,4 @@
-~~# process_thread
+# process_thread
 
 프로세스와 스레드의 동작 방식을 실습하고 탐구하는 Java 기반 학습 프로젝트
 
