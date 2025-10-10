@@ -1,4 +1,4 @@
-package com.study.thread.comparison.resource;
+package com.study.comparison.resource;
 
 import java.lang.management.*;
 import java.time.Duration;
