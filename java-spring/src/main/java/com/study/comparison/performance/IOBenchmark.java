@@ -1,4 +1,5 @@
-package com.study.thread.comparison.performance;
+package com.study.comparison.performance;
+
 
 import java.io.*;
 import java.net.*;
